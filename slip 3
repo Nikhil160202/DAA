@@ -1,0 +1,183 @@
+slip 3
+
+1.Write a program to sort a given set of elements using the Quick sort method and determine
+the time required to sort the elements
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function prototypes
+void quickSort(int arr[], int low, int high);
+int partition(int arr[], int low, int high);
+void swap(int* a, int* b);
+void printArray(int arr[], int size);
+
+int main() {
+    int n;
+
+    // Read the number of elements
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+
+    // Generate random numbers
+    srand(time(NULL));
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 1000; // Generating numbers between 0 and 999
+    }
+
+    // Print the array before sorting
+    printf("Array before sorting:\n");
+    printArray(arr, n);
+
+    // Measure time before sorting
+    clock_t start = clock();
+
+    // Sorting using Quick sort
+    quickSort(arr, 0, n - 1);
+
+    // Measure time after sorting
+    clock_t end = clock();
+
+    // Print the array after sorting
+    printf("Array after sorting:\n");
+    printArray(arr, n);
+
+    // Calculate the time taken for sorting
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken to sort %d elements: %f seconds\n", n, time_taken);
+
+    return 0;
+}
+
+// Function to perform Quick sort
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        // Partitioning index
+        int pi = partition(arr, low, high);
+
+        // Separately sort elements before partition and after partition
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Function to partition the array
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high]; // Choosing the pivot element
+    int i = (low - 1); // Index of smaller element
+
+    for (int j = low; j <= high - 1; j++) {
+        // If current element is smaller than the pivot
+        if (arr[j] < pivot) {
+            i++; // Increment index of smaller element
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+// Function to swap two elements
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Function to print an array
+void printArray(int arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+2.Write a program to find Minimum Cost Spanning Tree of a given undirected graph using
+Prims algorithm 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define V 5 // Number of vertices in the graph
+
+// Function to find the vertex with minimum key value
+int minKey(int key[], int mstSet[]) {
+    int min = INT_MAX, min_index;
+
+    for (int v = 0; v < V; v++) {
+        if (mstSet[v] == 0 && key[v] < min) {
+            min = key[v];
+            min_index = v;
+        }
+    }
+    return min_index;
+}
+
+// Function to print the constructed MST stored in parent[]
+void printMST(int parent[], int graph[V][V]) {
+    printf("Edge   Weight\n");
+    for (int i = 1; i < V; i++)
+        printf("%d - %d    %d \n", parent[i], i, graph[i][parent[i]]);
+}
+
+// Function to construct and print MST for a graph represented using adjacency matrix representation
+void primMST(int graph[V][V]) {
+    int parent[V]; // Array to store constructed MST
+    int key[V]; // Key values used to pick minimum weight edge in cut
+    int mstSet[V]; // To represent set of vertices included in MST
+
+    // Initialize all keys as INFINITE
+    for (int i = 0; i < V; i++) {
+        key[i] = INT_MAX;
+        mstSet[i] = 0;
+    }
+
+    // Always include first vertex in MST
+    key[0] = 0; // Make key 0 so that this vertex is picked as first vertex
+    parent[0] = -1; // First node is always root of MST
+
+    // The MST will have V vertices
+    for (int count = 0; count < V - 1; count++) {
+        // Pick the minimum key vertex from the set of vertices not yet included in MST
+        int u = minKey(key, mstSet);
+
+        // Add the picked vertex to the MST Set
+        mstSet[u] = 1;
+
+        // Update key value and parent index of the adjacent vertices of the picked vertex
+        // Consider only those vertices which are not yet included in MST
+        for (int v = 0; v < V; v++) {
+            // graph[u][v] is non-zero only for adjacent vertices of m
+            // mstSet[v] is false for vertices not yet included in MST
+            // Update the key only if graph[u][v] is smaller than key[v]
+            if (graph[u][v] && mstSet[v] == 0 && graph[u][v] < key[v]) {
+                parent[v] = u;
+                key[v] = graph[u][v];
+            }
+        }
+    }
+
+    // Print the constructed MST
+    printMST(parent, graph);
+}
+
+int main() {
+    // Example graph represented using adjacency matrix
+    int graph[V][V] = {
+        {0, 2, 0, 6, 0},
+        {2, 0, 3, 8, 5},
+        {0, 3, 0, 0, 7},
+        {6, 8, 0, 0, 9},
+        {0, 5, 7, 9, 0}
+    };
+
+    // Print the MST
+    printf("Minimum Spanning Tree:\n");
+    primMST(graph);
+
+    return 0;
+}
