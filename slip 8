@@ -1,0 +1,135 @@
+slip 8.
+1.Write a program to implement Fractional Knapsack problems using Greedy Method.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for an item which stores weight and value of an item
+struct Item {
+    int value;
+    int weight;
+};
+
+// Function to compare two items based on their value per unit weight
+int compare(const void* a, const void* b) {
+    double ratio1 = (double)(((struct Item*)a)->value) / (((struct Item*)a)->weight);
+    double ratio2 = (double)(((struct Item*)b)->value) / (((struct Item*)b)->weight);
+    return (ratio2 > ratio1) ? 1 : -1;
+}
+
+// Function to solve fractional knapsack problem
+void fractionalKnapsack(struct Item items[], int n, int capacity) {
+    // Sort items by value per unit weight in non-increasing order
+    qsort(items, n, sizeof(struct Item), compare);
+
+    // Initialize total value of knapsack
+    double totalValue = 0.0;
+
+    // Initialize remaining capacity of knapsack
+    int remainingCapacity = capacity;
+
+    // Initialize index of current item
+    int i = 0;
+
+    // Loop through all items and fill the knapsack greedily
+    while (i < n && remainingCapacity > 0) {
+        // If adding the entire item doesn't exceed the capacity, add it
+        if (items[i].weight <= remainingCapacity) {
+            totalValue += items[i].value;
+            remainingCapacity -= items[i].weight;
+        } else { // Otherwise, add a fraction of the item
+            totalValue += (double)items[i].value / items[i].weight * remainingCapacity;
+            remainingCapacity = 0;
+        }
+        i++;
+    }
+
+    // Print the maximum possible value
+    printf("Maximum possible value in knapsack = %.2lf\n", totalValue);
+}
+
+int main() {
+    // Example usage
+    struct Item items[] = {{60, 10}, {100, 20}, {120, 30}};
+    int n = sizeof(items) / sizeof(items[0]);
+    int capacity = 50;
+    fractionalKnapsack(items, n, capacity);
+    return 0;
+}
+
+2.Write Program to implement Traveling Salesman Problem using nearest neighbor 
+algorithm.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define V 4 // Number of vertices in the graph
+
+// Function to find the minimum distance vertex from the set of vertices not yet included in the path
+int minDistance(int dist[], int visited[]) {
+    int min = INT_MAX, min_index;
+
+    for (int v = 0; v < V; v++)
+        if (visited[v] == 0 && dist[v] < min)
+            min = dist[v], min_index = v;
+
+    return min_index;
+}
+
+// Function to print the path
+void printPath(int parent[], int n, int graph[V][V]) {
+    printf("Path: ");
+    int totalDistance = 0;
+    for (int i = 1; i < V; i++) {
+        printf("%d ", parent[i]);
+        totalDistance += graph[parent[i]][i];
+    }
+    printf("0"); // Returning to the starting point
+    totalDistance += graph[parent[V-1]][0]; // Adding the distance to return to the starting point
+    printf("\nTotal Distance: %d\n", totalDistance);
+}
+
+// Function to implement the nearest neighbor algorithm for TSP
+void nearestNeighbor(int graph[V][V]) {
+    int parent[V]; // Array to store the path
+    int visited[V]; // Array to keep track of visited vertices
+
+    // Initialize parent and visited arrays
+    for (int i = 0; i < V; i++) {
+        parent[i] = -1;
+        visited[i] = 0;
+    }
+
+    // Always start from vertex 0
+    visited[0] = 1;
+    int currentVertex = 0;
+
+    // Find the nearest neighbor for each vertex
+    for (int count = 0; count < V - 1; count++) {
+        int nearest = minDistance(graph[currentVertex], visited);
+        parent[nearest] = currentVertex;
+        visited[nearest] = 1;
+        currentVertex = nearest;
+    }
+
+    // Print the path
+    printPath(parent, V, graph);
+}
+
+int main() {
+    // Sample graph represented using adjacency matrix
+    int graph[V][V] = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+
+    // Solve the TSP using the nearest neighbor algorithm
+    printf("Nearest Neighbor Algorithm:\n");
+    nearestNeighbor(graph);
+
+    return 0;
+}
+
