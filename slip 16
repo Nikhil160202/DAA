@@ -1,0 +1,133 @@
+slip 16.
+1.Write a program to implement to find out solution for 0/1 knapsack problem using 
+dynamic programming.
+
+#include <stdio.h>
+
+// Function to find the maximum of two integers
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+
+// Function to solve the 0/1 Knapsack problem using dynamic programming
+int knapsack(int W, int weights[], int values[], int n) {
+    int dp[n + 1][W + 1];
+
+    // Build table dp[][] in bottom up manner
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= W; w++) {
+            if (i == 0 || w == 0)
+                dp[i][w] = 0;
+            else if (weights[i - 1] <= w)
+                dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+            else
+                dp[i][w] = dp[i - 1][w];
+        }
+    }
+
+    // The maximum value that can be put in a knapsack of capacity W
+    return dp[n][W];
+}
+
+int main() {
+    int n, capacity;
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    int weights[n], values[n];
+    printf("Enter the weights and values of the items:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &weights[i], &values[i]);
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &capacity);
+
+    int maxValue = knapsack(capacity, weights, values, n);
+    printf("The maximum value that can be obtained is: %d\n", maxValue);
+
+    return 0;
+}
+
+2.Write a program to determine if a given graph is a Hamiltonian cycle or not. 
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_VERTICES 100
+
+// Function to check if vertex v can be added at index 'pos' in the Hamiltonian Cycle
+bool isSafe(int v, bool graph[MAX_VERTICES][MAX_VERTICES], int path[], int pos, int V) {
+    // Check if this vertex is adjacent to the previously added vertex
+    if (!graph[path[pos - 1]][v])
+        return false;
+
+    // Check if the vertex has not already been included
+    for (int i = 0; i < pos; i++)
+        if (path[i] == v)
+            return false;
+
+    return true;
+}
+
+// Recursive utility function to solve Hamiltonian cycle problem
+bool hamCycleUtil(bool graph[MAX_VERTICES][MAX_VERTICES], int path[], int pos, int V) {
+    if (pos == V) {
+        // If the last vertex is adjacent to the first vertex in the path, it forms a cycle
+        if (graph[path[pos - 1]][path[0]])
+            return true;
+        else
+            return false;
+    }
+
+    // Try different vertices as next candidate in Hamiltonian Cycle
+    for (int v = 1; v < V; v++) {
+        if (isSafe(v, graph, path, pos, V)) {
+            path[pos] = v;
+            if (hamCycleUtil(graph, path, pos + 1, V))
+                return true;
+            path[pos] = -1; // Backtrack
+        }
+    }
+
+    return false;
+}
+
+// Function to check if a Hamiltonian cycle exists in the graph
+void hamCycle(bool graph[MAX_VERTICES][MAX_VERTICES], int V) {
+    int path[MAX_VERTICES];
+    for (int i = 0; i < V; i++)
+        path[i] = -1;
+
+    // Start from the first vertex
+    path[0] = 0;
+    if (!hamCycleUtil(graph, path, 1, V))
+        printf("No Hamiltonian cycle exists\n");
+    else {
+        printf("Hamiltonian cycle exists. Path:\n");
+        for (int i = 0; i < V; i++)
+            printf("%d ", path[i]);
+        printf("%d\n", path[0]);
+    }
+}
+
+int main() {
+    int V, E;
+    printf("Enter the number of vertices in the graph: ");
+    scanf("%d", &V);
+    printf("Enter the number of edges in the graph: ");
+    scanf("%d", &E);
+
+    bool graph[MAX_VERTICES][MAX_VERTICES] = {{false}};
+    printf("Enter the adjacency matrix representation of the graph:\n");
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        printf("Enter edge %d (vertex u, vertex v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        graph[u][v] = true;
+        graph[v][u] = true; // Undirected graph
+    }
+
+    hamCycle(graph, V);
+
+    return 0;
+}
