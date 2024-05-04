@@ -1,0 +1,164 @@
+slip 1
+
+1.Write a program to sort a list of n numbers in ascending order using selection sort and
+determine the time required to sort the elements.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function to perform selection sort
+void selectionSort(int arr[], int n)
+ {
+    int i, j, min_index, temp;
+    for (i = 0; i < n - 1; i++)
+ {
+        min_index = i;
+        for (j = i + 1; j < n; j++) 
+{
+            if (arr[j] < arr[min_index])
+ {
+                min_index = j;
+           
+ }
+       
+ }
+        // Swap the found minimum element with the first element
+        temp = arr[min_index];
+        arr[min_index] = arr[i];
+        arr[i] = temp;
+    }
+}
+
+int main()
+ {
+    int n, i;
+    clock_t start, end;
+    double cpu_time_used;
+
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int *arr = (int *)malloc(n * sizeof(int));
+
+    // Input elements
+    printf("Enter %d integers:\n", n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    start = clock(); // Record the start time
+
+    // Perform selection sort
+    selectionSort(arr, n);
+
+    end = clock(); // Record the end time
+
+    // Calculate the time taken for sorting
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    printf("Sorted array: ");
+    for (i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    printf("Time taken for sorting: %f seconds\n", cpu_time_used);
+
+    free(arr); // Free dynamically allocated memory
+
+    return 0;
+}
+
+2. Write a program to sort a given set of elements using the Quick sort method and determine
+the time required to sort the elements. Repeat the experiment for different values of n, the
+number of elements in the list to be sorted. The elements can be read from a file or can be
+generated using the random number generator.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function prototypes
+void quickSort(int arr[], int low, int high);
+int partition(int arr[], int low, int high);
+void swap(int* a, int* b);
+void printArray(int arr[], int size);
+
+int main() {
+    int n;
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+
+    // Generating random numbers
+    srand(time(NULL));
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 1000; // Generating numbers between 0 and 999
+    }
+
+    printf("Array before sorting:\n");
+    printArray(arr, n);
+
+    // Measure time before sorting
+    clock_t start = clock();
+
+    // Sorting using Quick sort
+    quickSort(arr, 0, n - 1);
+
+    // Measure time after sorting
+    clock_t end = clock();
+
+    printf("Array after sorting:\n");
+    printArray(arr, n);
+
+    // Calculate the time taken for sorting
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken to sort %d elements: %f seconds\n", n, time_taken);
+
+    return 0;
+}
+
+// Function to perform Quick sort
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        // Partitioning index
+        int pi = partition(arr, low, high);
+
+        // Separately sort elements before partition and after partition
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Function to partition the array
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high]; // Choosing the pivot element
+    int i = (low - 1); // Index of smaller element
+
+    for (int j = low; j <= high - 1; j++) {
+        // If current element is smaller than the pivot
+        if (arr[j] < pivot) {
+            i++; // Increment index of smaller element
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+// Function to swap two elements
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Function to print an array
+void printArray(int arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
