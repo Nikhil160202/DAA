@@ -1,0 +1,161 @@
+slip 15.
+1.Write a program to implement to find out solution for 0/1 knapsack problem using
+LCBB (Least Cost Branch and Bound).
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_ITEMS 100
+
+// Structure to represent items
+typedef struct {
+    int weight;
+    int value;
+    float cost;
+    int index;
+} Item;
+
+// Compare function for sorting items by cost
+int compare(const void* a, const void* b) {
+    float costA = ((Item*)a)->cost;
+    float costB = ((Item*)b)->cost;
+    return costB - costA;
+}
+
+// Function to solve 0/1 Knapsack using LCBB
+int knapsackLCBB(int capacity, int weights[], int values[], int n) {
+    Item items[n];
+    for (int i = 0; i < n; i++) {
+        items[i].weight = weights[i];
+        items[i].value = values[i];
+        items[i].cost = (float)values[i] / weights[i];
+        items[i].index = i;
+    }
+
+    // Sort items by cost in non-increasing order
+    qsort(items, n, sizeof(Item), compare);
+
+    int currentWeight = 0;
+    float finalValue = 0.0;
+
+    // Initialize result arrays
+    int result[MAX_ITEMS];
+    for (int i = 0; i < n; i++)
+        result[i] = -1;
+
+    // Calculate initial bound (current value) using greedy solution
+    for (int i = 0; i < n; i++) {
+        if (currentWeight + items[i].weight <= capacity) {
+            currentWeight += items[i].weight;
+            finalValue += items[i].value;
+            result[items[i].index] = 1;
+        } else {
+            int remaining = capacity - currentWeight;
+            finalValue += items[i].cost * remaining;
+            break;
+        }
+    }
+
+    // Output final value
+    printf("The maximum value that can be obtained is: %.2f\n", finalValue);
+
+    // Output the items selected
+    printf("Selected items:\n");
+    for (int i = 0; i < n; i++) {
+        if (result[i] == 1)
+            printf("Item %d (Weight: %d, Value: %d)\n", i + 1, weights[i], values[i]);
+    }
+
+    return finalValue;
+}
+
+int main() {
+    int n, capacity;
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    int weights[MAX_ITEMS], values[MAX_ITEMS];
+    printf("Enter the weights and values of the items:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &weights[i], &values[i]);
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &capacity);
+
+    knapsackLCBB(capacity, weights, values, n);
+
+    return 0;
+}
+
+2.Write a program to implement Graph Coloring Algorithm.
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_VERTICES 100
+
+// Function to check if it's safe to color the vertex with the given color
+bool isSafe(int vertex, int graph[MAX_VERTICES][MAX_VERTICES], int colors[], int color, int V) {
+    for (int i = 0; i < V; i++) {
+        if (graph[vertex][i] && colors[i] == color)
+            return false;
+    }
+    return true;
+}
+
+// Function to recursively assign colors to the vertices
+bool graphColoringUtil(int graph[MAX_VERTICES][MAX_VERTICES], int colors[], int vertex, int V, int numColors) {
+    if (vertex == V)
+        return true;
+
+    for (int color = 1; color <= numColors; color++) {
+        if (isSafe(vertex, graph, colors, color, V)) {
+            colors[vertex] = color;
+            if (graphColoringUtil(graph, colors, vertex + 1, V, numColors))
+                return true;
+            colors[vertex] = 0; // Backtrack
+        }
+    }
+    return false;
+}
+
+// Function to perform graph coloring
+void graphColoring(int graph[MAX_VERTICES][MAX_VERTICES], int V, int numColors) {
+    int colors[MAX_VERTICES];
+    for (int i = 0; i < V; i++)
+        colors[i] = 0;
+
+    if (!graphColoringUtil(graph, colors, 0, V, numColors))
+        printf("No solution exists\n");
+    else {
+        printf("Solution found. Vertex colors:\n");
+        for (int i = 0; i < V; i++)
+            printf("Vertex %d: Color %d\n", i + 1, colors[i]);
+    }
+}
+
+int main() {
+    int V, E, numColors;
+    printf("Enter the number of vertices in the graph: ");
+    scanf("%d", &V);
+    printf("Enter the number of edges in the graph: ");
+    scanf("%d", &E);
+
+    int graph[MAX_VERTICES][MAX_VERTICES] = {{0}};
+    printf("Enter the adjacency matrix representation of the graph:\n");
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        printf("Enter edge %d (vertex u, vertex v): ", i + 1);
+        scanf("%d %d", &u, &v);
+        graph[u - 1][v - 1] = 1;
+        graph[v - 1][u - 1] = 1; // Undirected graph
+    }
+
+    printf("Enter the number of colors: ");
+    scanf("%d", &numColors);
+
+    graphColoring(graph, V, numColors);
+
+    return 0;
+}
