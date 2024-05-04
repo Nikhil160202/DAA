@@ -1,0 +1,490 @@
+slip 4.
+
+1.Write a program to implement a Merge Sort algorithm to sort a given set of elements and
+determine the time required to sort the elements
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function prototypes
+void mergeSort(int arr[], int l, int r);
+void merge(int arr[], int l, int m, int r);
+void printArray(int arr[], int size);
+
+int main() {
+    int n;
+
+    // Read the number of elements
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+
+    // Generate random numbers
+    srand(time(NULL));
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 1000; // Generating numbers between 0 and 999
+    }
+
+    // Print the array before sorting
+    printf("Array before sorting:\n");
+    printArray(arr, n);
+
+    // Measure time before sorting
+    clock_t start = clock();
+
+    // Sorting using Merge sort
+    mergeSort(arr, 0, n - 1);
+
+    // Measure time after sorting
+    clock_t end = clock();
+
+    // Print the array after sorting
+    printf("Array after sorting:\n");
+    printArray(arr, n);
+
+    // Calculate the time taken for sorting
+    double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken to sort %d elements: %f seconds\n", n, time_taken);
+
+    return 0;
+}
+
+// Function to perform Merge sort
+void mergeSort(int arr[], int l, int r) {
+    if (l < r) {
+        // Same as (l+r)/2, but avoids overflow for large l and r
+        int m = l + (r - l) / 2;
+
+        // Sort first and second halves
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+
+        // Merge the sorted halves
+        merge(arr, l, m, r);
+    }
+}
+
+// Function to merge two sub-arrays of arr[]
+void merge(int arr[], int l, int m, int r) {
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+
+    // Create temporary arrays
+    int L[n1], R[n2];
+
+    // Copy data to temporary arrays L[] and R[]
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+
+    // Merge the temporary arrays back into arr[l..r]
+    i = 0; // Initial index of first sub-array
+    j = 0; // Initial index of second sub-array
+    k = l; // Initial index of merged sub-array
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    // Copy the remaining elements of L[], if there are any
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    // Copy the remaining elements of R[], if there are any
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+// Function to print an array
+void printArray(int arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+2.Write a program to implement Knapsack problems using Greedy method 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent an item
+struct Item {
+    int value;
+    int weight;
+};
+
+// Function to compare items based on their value-to-weight ratio
+int compare(const void* a, const void* b) {
+    double ratioA = (double)(((struct Item*)a)->value) / (((struct Item*)a)->weight);
+    double ratioB = (double)(((struct Item*)b)->value) / (((struct Item*)b)->weight);
+    return ratioB - ratioA; // Sort in non-increasing order of value-to-weight ratio
+}
+
+// Function to solve the Knapsack problem using a greedy approach
+void knapsackGreedy(int W, struct Item arr[], int n) {
+    // Sort items based on their value-to-weight ratio
+    qsort(arr, n, sizeof(struct Item), compare);
+
+    int currentWeight = 0; // Current weight in knapsack
+    double finalValue = 0.0; // Final value of items in knapsack
+
+    // Iterate through all items
+    for (int i = 0; i < n; i++) {
+        // If adding the next item doesn't exceed the capacity, add it
+        if (currentWeight + arr[i].weight <= W) {
+            currentWeight += arr[i].weight;
+            finalValue += arr[i].value;
+        } else { // Otherwise, add a fraction of the next item
+            int remainingWeight = W - currentWeight;
+            finalValue += arr[i].value * ((double)remainingWeight / arr[i].weight);
+            break; // Knapsack full
+        }
+    }
+
+    printf("Maximum value in the knapsack (using Greedy method): %.2lf\n", finalValue);
+}
+
+int main() {
+    int n, W;
+
+    // Read the number of items and the capacity of the knapsack
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &W);
+
+    struct Item arr[n];
+
+    // Read the values and weights of the items
+    printf("Enter the value and weight of each item:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Item %d: ", i + 1);
+        scanf("%d %d", &arr[i].value, &arr[i].weight);
+    }
+
+    // Solve the Knapsack problem using the greedy method
+    knapsackGreedy(W, arr, n);
+
+    return 0;
+}
+
+slip 5.
+1.Write a program for the Implementation of Kruskal’s algorithm to find minimum
+cost spanning tree.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent an edge in the graph
+struct Edge {
+    int src, dest, weight;
+};
+
+// Structure to represent a subset for union-find
+struct Subset {
+    int parent;
+    int rank;
+};
+
+// A utility function to find set of an element i
+int find(struct Subset subsets[], int i) {
+    // find root and make root as parent of i (path compression)
+    if (subsets[i].parent != i)
+        subsets[i].parent = find(subsets, subsets[i].parent);
+
+    return subsets[i].parent;
+}
+
+// A function that does union of two sets of x and y (uses union by rank)
+void Union(struct Subset subsets[], int x, int y) {
+    int xroot = find(subsets, x);
+    int yroot = find(subsets, y);
+
+    // Attach smaller rank tree under root of high rank tree (Union by Rank)
+    if (subsets[xroot].rank < subsets[yroot].rank)
+        subsets[xroot].parent = yroot;
+    else if (subsets[xroot].rank > subsets[yroot].rank)
+        subsets[yroot].parent = xroot;
+
+    // If ranks are same, then make one as root and increment its rank by one
+    else {
+        subsets[yroot].parent = xroot;
+        subsets[xroot].rank++;
+    }
+}
+
+// Compare two edges according to their weights
+int compare(const void* a, const void* b) {
+    struct Edge* edge1 = (struct Edge*)a;
+    struct Edge* edge2 = (struct Edge*)b;
+    return edge1->weight - edge2->weight;
+}
+
+// Function to construct MST using Kruskal's algorithm
+void KruskalMST(struct Edge* edges, int V, int E) {
+    struct Edge result[V];  // This will store the resultant MST
+    int e = 0;  // Index variable used for result[]
+    int i = 0;  // Index variable used for sorted edges
+
+    // Step 1: Sort all the edges in non-decreasing order of their weight
+    qsort(edges, E, sizeof(edges[0]), compare);
+
+    // Allocate memory for creating V subsets
+    struct Subset* subsets = (struct Subset*)malloc(V * sizeof(struct Subset));
+
+    // Create V subsets with single elements
+    for (int v = 0; v < V; ++v) {
+        subsets[v].parent = v;
+        subsets[v].rank = 0;
+    }
+
+    // Number of edges to be taken is equal to V-1
+    while (e < V - 1 && i < E) {
+        // Step 2: Pick the smallest edge. And increment the index for next iteration
+        struct Edge next_edge = edges[i++];
+
+        int x = find(subsets, next_edge.src);
+        int y = find(subsets, next_edge.dest);
+
+        // If including this edge doesn't cause cycle, include it in result and increment the index of result for next edge
+        if (x != y) {
+            result[e++] = next_edge;
+            Union(subsets, x, y);
+        }
+    }
+
+    // Print the constructed MST
+    printf("Minimum Spanning Tree:\n");
+    for (i = 0; i < e; ++i)
+        printf("%d -- %d == %d\n", result[i].src, result[i].dest, result[i].weight);
+
+    free(subsets);
+}
+
+int main() {
+    int V, E;
+    printf("Enter the number of vertices and edges: ");
+    scanf("%d %d", &V, &E);
+
+    struct Edge* edges = (struct Edge*)malloc(E * sizeof(struct Edge));
+
+    printf("Enter source, destination, and weight of each edge:\n");
+    for (int i = 0; i < E; ++i)
+        scanf("%d %d %d", &edges[i].src, &edges[i].dest, &edges[i].weight);
+
+    KruskalMST(edges, V, E);
+
+    free(edges);
+    return 0;
+}
+
+2.Write a program to implement Huffman Code using greedy methods and also calculate the
+best case and worst-case complexity
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_TREE_HT 100
+
+// A Huffman tree node
+struct MinHeapNode {
+    char data;
+    unsigned freq;
+    struct MinHeapNode *left, *right;
+};
+
+// A Min Heap: Collection of min heap (or Huffman tree) nodes
+struct MinHeap {
+    unsigned size;
+    unsigned capacity;
+    struct MinHeapNode** array;
+};
+
+// Function to allocate a new min heap node with given character and frequency
+struct MinHeapNode* newNode(char data, unsigned freq) {
+    struct MinHeapNode* temp = (struct MinHeapNode*)malloc(sizeof(struct MinHeapNode));
+    temp->left = temp->right = NULL;
+    temp->data = data;
+    temp->freq = freq;
+    return temp;
+}
+
+// Function to create a min heap of given capacity
+struct MinHeap* createMinHeap(unsigned capacity) {
+    struct MinHeap* minHeap = (struct MinHeap*)malloc(sizeof(struct MinHeap));
+    minHeap->size = 0;
+    minHeap->capacity = capacity;
+    minHeap->array = (struct MinHeapNode**)malloc(minHeap->capacity * sizeof(struct MinHeapNode*));
+    return minHeap;
+}
+
+// Function to swap two min heap nodes
+void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b) {
+    struct MinHeapNode* t = *a;
+    *a = *b;
+    *b = t;
+}
+
+// Function to heapify at given index
+void minHeapify(struct MinHeap* minHeap, int idx) {
+    int smallest = idx;
+    int left = 2 * idx + 1;
+    int right = 2 * idx + 2;
+
+    if (left < minHeap->size && minHeap->array[left]->freq < minHeap->array[smallest]->freq)
+        smallest = left;
+
+    if (right < minHeap->size && minHeap->array[right]->freq < minHeap->array[smallest]->freq)
+        smallest = right;
+
+    if (smallest != idx) {
+        swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[idx]);
+        minHeapify(minHeap, smallest);
+    }
+}
+
+// Function to check if size of heap is 1
+int isSizeOne(struct MinHeap* minHeap) {
+    return (minHeap->size == 1);
+}
+
+// Function to extract minimum value node from heap
+struct MinHeapNode* extractMin(struct MinHeap* minHeap) {
+    struct MinHeapNode* temp = minHeap->array[0];
+    minHeap->array[0] = minHeap->array[minHeap->size - 1];
+    --minHeap->size;
+    minHeapify(minHeap, 0);
+    return temp;
+}
+
+// Function to insert a new node to min heap
+void insertMinHeap(struct MinHeap* minHeap, struct MinHeapNode* minHeapNode) {
+    ++minHeap->size;
+    int i = minHeap->size - 1;
+    while (i && minHeapNode->freq < minHeap->array[(i - 1) / 2]->freq) {
+        minHeap->array[i] = minHeap->array[(i - 1) / 2];
+        i = (i - 1) / 2;
+    }
+    minHeap->array[i] = minHeapNode;
+}
+
+// Function to build a min heap
+void buildMinHeap(struct MinHeap* minHeap) {
+    int n = minHeap->size - 1;
+    int i;
+    for (i = (n - 1) / 2; i >= 0; --i)
+        minHeapify(minHeap, i);
+}
+
+// Function to print an array of size n
+void printArr(int arr[], int n) {
+    int i;
+    for (i = 0; i < n; ++i)
+        printf("%d", arr[i]);
+    printf("\n");
+}
+
+// Function to check if node is leaf
+int isLeaf(struct MinHeapNode* root) {
+    return !(root->left) && !(root->right);
+}
+
+// Function to create a min heap of capacity equal to size and insert all characters of data[] in heap
+struct MinHeap* createAndBuildMinHeap(char data[], int freq[], int size) {
+    struct MinHeap* minHeap = createMinHeap(size);
+    for (int i = 0; i < size; ++i)
+        minHeap->array[i] = newNode(data[i], freq[i]);
+    minHeap->size = size;
+    buildMinHeap(minHeap);
+    return minHeap;
+}
+
+// Function to build Huffman tree
+struct MinHeapNode* buildHuffmanTree(char data[], int freq[], int size) {
+    struct MinHeapNode *left, *right, *top;
+    struct MinHeap* minHeap = createAndBuildMinHeap(data, freq, size);
+    while (!isSizeOne(minHeap)) {
+        left = extractMin(minHeap);
+        right = extractMin(minHeap);
+        top = newNode('$', left->freq + right->freq);
+        top->left = left;
+        top->right = right;
+        insertMinHeap(minHeap, top);
+    }
+    return extractMin(minHeap);
+}
+
+// Function to print Huffman codes from the root of Huffman Tree
+void printCodes(struct MinHeapNode* root, int arr[], int top) {
+    if (root->left) {
+        arr[top] = 0;
+        printCodes(root->left, arr, top + 1);
+    }
+    if (root->right) {
+        arr[top] = 1;
+        printCodes(root->right, arr, top + 1);
+    }
+    if (isLeaf(root)) {
+        printf("%c: ", root->data);
+        printArr(arr, top);
+    }
+}
+
+// Function to build Huffman Tree and print Huffman codes
+void HuffmanCodes(char data[], int freq[], int size) {
+    struct MinHeapNode* root = buildHuffmanTree(data, freq, size);
+    int arr[MAX_TREE_HT], top = 0;
+    printCodes(root, arr, top);
+}
+
+// Function to calculate best-case complexity of Huffman Coding
+int bestCaseHuffman(int freq[], int size) {
+    return 2 * (size - 1);
+}
+
+// Function to calculate worst-case complexity of Huffman Coding
+int worstCaseHuffman(int freq[], int size) {
+    int max = 0, second_max = 0;
+    for (int i = 0; i < size; i++) {
+        if (freq[i] > max) {
+            second_max = max;
+            max = freq[i];
+        } else if (freq[i] > second_max && freq[i] != max) {
+            second_max = freq[i];
+        }
+    }
+    return 2 * (max + second_max - 1);
+}
+
+int main() {
+    char arr[] = { 'a', 'b', 'c', 'd', 'e', 'f' };
+    int freq[] = { 5, 9, 12, 13, 16, 45 };
+    int size = sizeof(arr) / sizeof(arr[0]);
+
+    printf("Huffman Codes:\n");
+    HuffmanCodes(arr, freq, size);
+
+    printf("\nBest-case complexity of Huffman Coding: %d\n", bestCaseHuffman(freq, size));
+    printf("Worst-case complexity of Huffman Coding: %d\n", worstCaseHuffman(freq, size));
+
+    return 0;
+}
