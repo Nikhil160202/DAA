@@ -1,0 +1,167 @@
+slip 14.
+1.Write a program to sort a list of n numbers in ascending order using Insertion sort and 
+determine the time required to sort the elements.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function to perform Insertion sort
+void insertionSort(int arr[], int n) {
+    int i, key, j;
+    for (i = 1; i < n; i++) {
+        key = arr[i];
+        j = i - 1;
+
+        // Move elements of arr[0..i-1], that are greater than key,
+        // to one position ahead of their current position
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+int main() {
+    int n, i;
+    clock_t start, end;
+    double time_used;
+
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+
+    int arr[n];
+
+    printf("Enter %d elements:\n", n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    // Record the start time
+    start = clock();
+
+    // Perform Insertion sort
+    insertionSort(arr, n);
+
+    // Record the end time
+    end = clock();
+
+    // Calculate the time used
+    time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    printf("Sorted elements:\n");
+    for (i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+
+    printf("Time taken to sort: %f seconds\n", time_used);
+
+    return 0;
+}
+
+2.Write a program to implement DFS and BFS. Compare the time complexity.
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+
+#define MAX_NODES 100
+
+// Queue implementation for BFS
+typedef struct {
+    int items[MAX_NODES];
+    int front;
+    int rear;
+} Queue;
+
+Queue* createQueue() {
+    Queue* queue = (Queue*)malloc(sizeof(Queue));
+    queue->front = -1;
+    queue->rear = -1;
+    return queue;
+}
+
+bool isEmpty(Queue* queue) {
+    return queue->rear == -1;
+}
+
+void enqueue(Queue* queue, int value) {
+    if (queue->rear == MAX_NODES - 1)
+        printf("Queue is full\n");
+    else {
+        if (queue->front == -1)
+            queue->front = 0;
+        queue->rear++;
+        queue->items[queue->rear] = value;
+    }
+}
+
+int dequeue(Queue* queue) {
+    int item;
+    if (isEmpty(queue)) {
+        printf("Queue is empty\n");
+        item = -1;
+    } else {
+        item = queue->items[queue->front];
+        queue->front++;
+        if (queue->front > queue->rear) {
+            queue->front = queue->rear = -1;
+        }
+    }
+    return item;
+}
+
+// Depth-First Search
+void dfs(int graph[MAX_NODES][MAX_NODES], int n, int vertex, bool visited[]) {
+    printf("%d ", vertex);
+    visited[vertex] = true;
+    for (int i = 0; i < n; i++) {
+        if (graph[vertex][i] && !visited[i])
+            dfs(graph, n, i, visited);
+    }
+}
+
+// Breadth-First Search
+void bfs(int graph[MAX_NODES][MAX_NODES], int n, int start) {
+    bool visited[MAX_NODES] = {false};
+    Queue* queue = createQueue();
+    visited[start] = true;
+    enqueue(queue, start);
+    while (!isEmpty(queue)) {
+        int vertex = dequeue(queue);
+        printf("%d ", vertex);
+        for (int i = 0; i < n; i++) {
+            if (graph[vertex][i] && !visited[i]) {
+                visited[i] = true;
+                enqueue(queue, i);
+            }
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    int n, i, j;
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
+    int graph[MAX_NODES][MAX_NODES];
+    printf("Enter the adjacency matrix:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    printf("Depth-First Search traversal: ");
+    bool visited_dfs[MAX_NODES] = {false};
+    dfs(graph, n, 0, visited_dfs);
+    printf("\n");
+
+    printf("Breadth-First Search traversal: ");
+    bfs(graph, n, 0);
+
+    return 0;
+}
+
